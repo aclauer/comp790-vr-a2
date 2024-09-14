@@ -1,6 +1,6 @@
 window.onload = function() {
-    var canvas = document.getElementById('myCanvas');
-    var c = canvas.getContext('2d');
+    var canvas = document.getElementById("myCanvas");
+    var c = canvas.getContext("2d");
 
     r = 32
     c.fillStyle = 'red';
