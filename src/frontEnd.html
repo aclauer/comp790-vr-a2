@@ -8,11 +8,11 @@
 
     <body>
         <h1>Spring Simulator</h1>
-        <p>Use the left and right arrow keys to change the spring constant k.</p>
+        <p>Left and right arrow keys change the spring constant k.</p>
+        <p>Up and down arrow keys change the mass m.</p>
         <canvas id="canvas" width="640" height="400"></canvas>    
         <script src="springSim.js"></script> 
-        <input type="range"  min="1" max="60" value="60" onchange="updateFrameRate(this.value)"/>
+        <input type="range"  min="1" max="60" value="30" onchange="updateFrameRate(this.value)"/>
 		<span id="FrameRateLabel">Maximum Frame Rate</span>
     </body>
-
 </html>

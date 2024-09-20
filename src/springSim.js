@@ -1,9 +1,11 @@
 let keyStates = {};
-let maxFPS = 60;
+let maxFPS = 30;
+
+let frameCount = 0;
 
 let system = {
     bx: 50,
-    by: 100,
+    by: 150,
     mx: 300,
     height: 200,
     width: 100,
@@ -32,9 +34,8 @@ window.onload = function() {
 
 
     function mainLoop(timestamp) {
-        console.log(timestamp);
-
         if (timestamp < lastFrameTimeMs + (1000 / maxFPS)) {
+            update(timestamp);
             requestAnimationFrame(mainLoop);
             return;
         }
@@ -52,15 +53,27 @@ window.onload = function() {
         // Update position of mass
         w = Math.sqrt(system.k / system.m);
         system.mx = 100 * (1 - Math.cos(w * (timestamp / 1000))) + system.initialPos;
+
+        if (frameCount < 20) {
+            console.log("system.mx: " + system.mx);
+        }
     }
     
     function draw() {			
         context.clearRect(0, 0, canvas.width, canvas.height);
-        drawPositionTest();
+        drawPositionText();
         drawSystemProperties();
         drawSpring();
         drawBase();
         drawMass();
+
+
+        ++framesThisSecond;
+        ++frameCount;
+        
+        if (frameCount < 20) {
+            console.log("Frame: " + frameCount);
+        }
     }
 
     function processInput() {
@@ -71,14 +84,21 @@ window.onload = function() {
             if (system.k < 0) {
                 system.k = 0;
             }
+        } else if (keyStates.ArrowUp) {
+            system.m *= 1.01;
+        } else if (keyStates.ArrowDown) {
+            system.m *= 0.99;
+            if (system.m < 0) {
+                system.m = 0;
+            }
         }
     }
 
-    function drawPositionTest() {
+    function drawPositionText() {
         context.save();
         context.translate(system.bx, system.by);
         context.font = "20px TimesNewRoman";
-        context.fillText("Current position: " + system.mx,0,-50);
+        context.fillText("Current position: " + system.mx,0,-90);
         context.restore();
     }
 
@@ -86,7 +106,10 @@ window.onload = function() {
         context.save();
         context.translate(system.bx, system.by);
         context.font = "16px TimesNewRoman";
-        context.fillText("System properties: m = " + system.m + ", k = " + system.k, 0, -30);
+        // context.fillText("System properties: m = " + system.m + ", k = " + system.k, 0, -30);
+        context.fillText("System Properties:", 0, -60);
+        context.fillText("m = " + system.m, 0, -40);
+        context.fillText("k = " + system.k, 0, -20);
         context.restore();
     }
 
@@ -142,12 +165,8 @@ window.onload = function() {
 
 window.addEventListener("keydown", function (event) {
     keyStates[event.key] = true;
-    console.log("Key " + event.key + " pressed.");
-    console.log(keyStates);
 });
 
 window.addEventListener("keyup", function (event) {
     keyStates[event.key] = false;
-    console.log("Key " + event.key + " released.");
-    console.log(keyStates);
 });
