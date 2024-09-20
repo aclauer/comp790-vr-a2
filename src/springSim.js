@@ -1,45 +1,92 @@
+let keyStates = {};
+let maxFPS = 60;
+
+let system = {
+    bx: 50,
+    by: 100,
+    mx: 300,
+    height: 200,
+    width: 100,
+    v: 0,
+    k: 1,
+    m: 0.5,
+    initialPos: 200
+}
+
+function updateFrameRate(newFrameRate) {
+    maxFPS = newFrameRate;
+}
+
 window.onload = function() {
     let canvas = document.getElementById("canvas");
     let context = canvas.getContext("2d");
 
-    let system = {
-        bx: 50,
-        by: 100,
-        mx: 300,
-        height: 200,
-        width: 100,
-        v: 0
-    }
-
     requestAnimationFrame(mainLoop);
 
-    let frame = 0;
-    function mainLoop() {
-        update();
+    let fps = 0;
+    let framesThisSecond = 0;
+
+    setInterval(function() {fps = framesThisSecond; framesThisSecond = 0;}, 1000);
+
+    let lastFrameTimeMs = 0;
+
+
+    function mainLoop(timestamp) {
+        console.log(timestamp);
+
+        if (timestamp < lastFrameTimeMs + (1000 / maxFPS)) {
+            requestAnimationFrame(mainLoop);
+            return;
+        }
+
+        lastFrameTimeMs = timestamp;
+
+        processInput();
+        update(timestamp);
         draw();
                   
         requestAnimationFrame(mainLoop);
     }
     
-    function update() {
+    function update(timestamp) {
         // Update position of mass
-        system.mx = 100 * Math.cos(frame / 20) + 200;
-        frame++;
+        w = Math.sqrt(system.k / system.m);
+        system.mx = 100 * (1 - Math.cos(w * (timestamp / 1000))) + system.initialPos;
     }
     
     function draw() {			
         context.clearRect(0, 0, canvas.width, canvas.height);
-        drawText();
+        drawPositionTest();
+        drawSystemProperties();
         drawSpring();
         drawBase();
         drawMass();
     }
 
-    function drawText() {
+    function processInput() {
+        if (keyStates.ArrowRight) {
+            system.k *= 1.01;
+        } else if (keyStates.ArrowLeft) {
+            system.k *= 0.99;
+            if (system.k < 0) {
+                system.k = 0;
+            }
+        }
+    }
+
+    function drawPositionTest() {
         context.save();
         context.translate(system.bx, system.by);
-        context.font = "20px Arial";
-        context.fillText("Current position: " + system.mx,0,-30);
+        context.font = "20px TimesNewRoman";
+        context.fillText("Current position: " + system.mx,0,-50);
+        context.restore();
+    }
+
+    function drawSystemProperties() {
+        context.save();
+        context.translate(system.bx, system.by);
+        context.font = "16px TimesNewRoman";
+        context.fillText("System properties: m = " + system.m + ", k = " + system.k, 0, -30);
         context.restore();
     }
 
@@ -91,5 +138,16 @@ window.onload = function() {
 
         context.restore();
     }
-
 }
+
+window.addEventListener("keydown", function (event) {
+    keyStates[event.key] = true;
+    console.log("Key " + event.key + " pressed.");
+    console.log(keyStates);
+});
+
+window.addEventListener("keyup", function (event) {
+    keyStates[event.key] = false;
+    console.log("Key " + event.key + " released.");
+    console.log(keyStates);
+});
